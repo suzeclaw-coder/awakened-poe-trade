@@ -136,10 +136,12 @@ export function parseClipboard (clipboard: string): Result<ParsedItem, string> {
 }
 
 function itemTextToSections (text: string) {
-  const lines = text.split(/\r?\n/)
-  if (lines[lines.length - 1] === '') {
-    lines.pop()
-  }
+  const lines = text
+    .split(/\r?\n/)
+    .map(line => line.trim())
+
+  while (lines.length && lines[0] === '') lines.shift()
+  while (lines.length && lines[lines.length - 1] === '') lines.pop()
 
   const sections: string[][] = [[]]
   lines.reduce((section, line) => {

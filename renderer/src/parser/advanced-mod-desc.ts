@@ -25,7 +25,7 @@ export interface ModifierInfo {
 export function parseModInfoLine (line: string): ModifierInfo {
   const [modText, xText2, xText3] = line
     .slice(1, -1)
-    .split('\u2014')
+    .split(/[\u2014\u2013]|--/)
     .map(_ => _.trim())
 
   let type = ModifierType.Explicit

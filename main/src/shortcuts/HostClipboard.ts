@@ -103,7 +103,8 @@ export class HostClipboard {
 }
 
 function isPoeItem (text: string) {
-  return LANGUAGE_DETECTOR.find(({ firstLine }) => text.startsWith(firstLine))
+  const trimmed = text.trimStart()
+  return LANGUAGE_DETECTOR.find(({ firstLine }) => trimmed.startsWith(firstLine))
 }
 
 const LANGUAGE_DETECTOR = [{
