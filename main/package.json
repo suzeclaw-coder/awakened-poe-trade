@@ -6,6 +6,10 @@
     "dev": "node build/script.mjs",
     "build": "tsc --noEmit && node build/script.mjs --prod",
     "package": "electron-builder build",
+    "package:mac:arm64": "electron-builder build --mac --arm64 --dir",
+    "package:mac:dmg": "electron-builder build --mac --arm64",
+    "sign:mac:arm64": "codesign --force --deep --sign \"AwakenedPoESigner\" dist/mac-arm64/\"Awakened PoE Trade.app\" && xattr -cr dist/mac-arm64/\"Awakened PoE Trade.app\"",
+    "install:mac:arm64": "killall \"Awakened PoE Trade\" 2>/dev/null || true; rm -rf \"/Applications/Awakened PoE Trade.app\" && cp -R dist/mac-arm64/\"Awakened PoE Trade.app\" /Applications/ && open \"/Applications/Awakened PoE Trade.app\"",
     "postinstall": "patch-package --patch-dir build"
   },
   "author": {
