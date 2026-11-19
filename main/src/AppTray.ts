@@ -3,9 +3,27 @@ import { app, Tray, Menu, shell, nativeImage, dialog } from 'electron'
 import type { ServerEvents } from './server'
 
 export class AppTray {
-  public overlayKey = 'Shift + Space'
+  private _overlayKey = 'Shift + Space'
   private tray: Tray
-  serverPort = 0
+  public serverPort = 0
+  private serverPortPromise?: Promise<number>
+
+  get overlayKey () { return this._overlayKey }
+  set overlayKey (key: string) {
+    if (this._overlayKey !== key) {
+      this._overlayKey = key
+      this.rebuildMenu()
+    }
+  }
+
+  setServerPortPromise (promise: Promise<number>) {
+    this.serverPortPromise = promise
+  }
+
+  setServerPort (port: number) {
+    this.serverPort = port
+    this.rebuildMenu()
+  }
 
   constructor (server: ServerEvents) {
     let trayImage = nativeImage.createFromPath(
@@ -46,8 +64,22 @@ export class AppTray {
       },
       {
         label: 'Open in Browser',
-        click: () => {
-          shell.openExternal(`http://localhost:${this.serverPort}`)
+        click: async () => {
+          if (!this.serverPort && this.serverPortPromise) {
+            try {
+              this.serverPort = await this.serverPortPromise
+            } catch {}
+          }
+
+          if (this.serverPort) {
+            shell.openExternal(`http://localhost:${this.serverPort}`)
+          } else {
+            dialog.showMessageBox({
+              type: 'info',
+              title: 'Awakened PoE Trade',
+              message: 'The local server is still starting up. Please try again in a moment.'
+            })
+          }
         }
       },
       { type: 'separator' },

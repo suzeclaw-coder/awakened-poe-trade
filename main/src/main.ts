@@ -35,8 +35,20 @@ app.on('ready', async () => {
   const appUpdater = new AppUpdater(eventPipe)
   const _httpProxy = new HttpProxy(server, logger)
 
+  // Start the server immediately so it binds a port and is ready
+  const serverPortPromise = startServer(appUpdater, logger)
+  tray.setServerPortPromise(serverPortPromise)
+
+  serverPortPromise.then((port) => {
+    tray.setServerPort(port)
+    logger.write(`info ${os.type()} ${os.release} / v${app.getVersion()}`)
+  }).catch((err) => {
+    logger.write(`error [server] Failed to start server: ${err}`)
+  })
+
   setTimeout(
     async () => {
+      const port = await serverPortPromise
       const overlay = new OverlayWindow(eventPipe, logger, poeWindow)
       new OverlayVisibility(eventPipe, overlay, gameConfig)
       const shortcuts = await Shortcuts.create(logger, overlay, poeWindow, gameConfig, eventPipe)
@@ -48,12 +60,12 @@ app.on('ready', async () => {
         appUpdater.checkAtStartup()
         tray.overlayKey = cfg.overlayKey
       })
-      uIOhook.start()
-      const port = await startServer(appUpdater, logger)
-      // TODO: move up (currently crashes)
-      logger.write(`info ${os.type()} ${os.release} / v${app.getVersion()}`)
+      try {
+        uIOhook.start()
+      } catch (err) {
+        logger.write(`error [uIOhook] Failed to start: ${err}`)
+      }
       overlay.loadAppPage(port)
-      tray.serverPort = port
     },
     // fixes(linux): window is black instead of transparent
     process.platform === 'linux' ? 1000 : 0
