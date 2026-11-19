@@ -246,5 +246,5 @@ open "/Applications/Awakened PoE Trade.app"
 | :--- | :--- | :--- |
 | **`errSecInternalComponent`** | `sudo codesign` was run. `root` cannot access your login keychain. | Run `codesign` **without `sudo`** as your normal user account. |
 | **"Malware Blocked"** | The app was signed with an Apple Developer certificate that was revoked (`CSSMERR_TP_CERT_REVOKED`). | Use the self-signed `AwakenedPoESigner` certificate described in this guide. |
-| **Stuck on `http://localhost:0/`** | The app was launched without Input Monitoring / Accessibility permissions. | Check **System Settings → Privacy & Security** and ensure both permissions are enabled for `/Applications/Awakened PoE Trade.app`. |
+| **Stuck on `http://localhost:0/`** | Earlier versions coupled the HTTP server startup with keyboard hooks. In our current branch, the server binds immediately on app launch, eliminating this issue. If permissions are missing, check **System Settings → Privacy & Security**. | Ensure Accessibility & Input Monitoring permissions are toggled ON. |
 | **Permission Denied when copying to `/Applications`** | An earlier install was owned by `root`. | Run `sudo chown -R $(whoami):admin "/Applications/Awakened PoE Trade.app"`, then replace the app. |
