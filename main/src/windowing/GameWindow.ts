@@ -1,6 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { EventEmitter } from 'events'
 import { OverlayController, AttachEvent } from 'electron-overlay-window'
+import { assertMacScreenRecording } from '../permissions'
 
 export interface GameWindow {
   on: (event: 'active-change', listener: (isActive: boolean) => void) => this
@@ -46,6 +47,7 @@ export class GameWindow extends EventEmitter {
   }
 
   screenshot () {
+    assertMacScreenRecording()
     return OverlayController.screenshot()
   }
 }

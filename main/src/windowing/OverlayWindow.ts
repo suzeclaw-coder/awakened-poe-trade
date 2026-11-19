@@ -4,6 +4,7 @@ import { OverlayController, OVERLAY_WINDOW_OPTS } from 'electron-overlay-window'
 import type { ServerEvents } from '../server'
 import type { Logger } from '../RemoteLogger'
 import type { GameWindow } from './GameWindow'
+import { handleMissingMacPermission } from '../permissions'
 
 export class OverlayWindow {
   public isInteractable = false
@@ -138,15 +139,24 @@ export class OverlayWindow {
 
   private handleOverlayAttached = (hasAccess?: boolean) => {
     if (hasAccess === false) {
-      this.logger.write('error [Overlay] PoE is running with administrator rights')
+      if (process.platform === 'darwin') {
+        handleMissingMacPermission(
+          'Accessibility',
+          'Path of Exile window detected, but Awakened PoE Trade lacks Accessibility permission to track its position.',
+          this.logger
+        )
+      } else {
+        this.logger.write('error [Overlay] PoE is running with administrator rights')
 
-      dialog.showErrorBox(
-        'PoE window - No access',
-        // ----------------------
-        'Path of Exile is running with administrator rights.\n' +
-        '\n' +
-        'You need to restart Awakened PoE Trade with administrator rights.'
-      )
+        dialog.showErrorBox(
+          'PoE window - No access',
+          // ----------------------
+          'Path of Exile is running with administrator rights.\n' +
+          '\n' +
+          'You need to restart Awakened PoE Trade with administrator rights.'
+        )
+        throw new Error('[PermissionError] Path of Exile is running with administrator rights. Please restart with administrator rights.')
+      }
     } else {
       this.server.sendEventTo('broadcast', {
         name: 'MAIN->OVERLAY::overlay-attached',

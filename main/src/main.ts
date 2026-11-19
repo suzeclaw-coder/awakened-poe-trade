@@ -14,6 +14,7 @@ import { AppTray } from './AppTray'
 import { OverlayVisibility } from './windowing/OverlayVisibility'
 import { GameLogWatcher } from './host-files/GameLogWatcher'
 import { HttpProxy } from './proxy'
+import { assertMacAccessibility, startHookWithPermissionCheck } from './permissions'
 
 if (!app.requestSingleInstanceLock()) {
   app.exit()
@@ -60,11 +61,8 @@ app.on('ready', async () => {
         appUpdater.checkAtStartup()
         tray.overlayKey = cfg.overlayKey
       })
-      try {
-        uIOhook.start()
-      } catch (err) {
-        logger.write(`error [uIOhook] Failed to start: ${err}`)
-      }
+      assertMacAccessibility(logger, true)
+      startHookWithPermissionCheck(uIOhook, logger)
       overlay.loadAppPage(port)
     },
     // fixes(linux): window is black instead of transparent
