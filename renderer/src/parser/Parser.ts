@@ -145,7 +145,7 @@ function itemTextToSections (text: string) {
 
   const sections: string[][] = [[]]
   lines.reduce((section, line) => {
-    if (line !== '--------') {
+    if (!/^[-—–]{4,}$/.test(line)) {
       section.push(line)
       return section
     } else {

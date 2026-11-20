@@ -151,6 +151,7 @@ function useTradeApi () {
 
   async function search (filters: ItemFilters, stats: FilterOrGroup[]) {
     try {
+      if (!filters?.trade) return
       searchId += 1
       error.value = null
       searchResult.value = null
@@ -235,6 +236,7 @@ export default defineComponent({
     const showBrowser = inject<(url: string) => void>('builtin-browser')!
 
     function makeTradeLink () {
+      if (!props.filters?.trade) return ''
       return (searchResult.value)
         ? `https://${getTradeEndpoint()}/trade/search/${props.filters.trade.league}/${searchResult.value.id}`
         : `https://${getTradeEndpoint()}/trade/search/${props.filters.trade.league}?q=${JSON.stringify(createTradeRequest(props.filters, props.stats))}`

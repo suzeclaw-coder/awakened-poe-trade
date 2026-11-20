@@ -149,7 +149,7 @@ export function initUiModFilters (
     groups: [],
     searchInRange: (item.rarity === ItemRarity.Normal) ? 100 : opts.searchStatRange,
     statsByType: item.statsByType.map(calc => {
-      if (calc.type === ModifierType.Fractured && calc.stat.trade.ids[ModifierType.Explicit]) {
+      if (calc.type === ModifierType.Fractured && calc.stat?.trade?.ids[ModifierType.Explicit]) {
         return { ...calc, type: ModifierType.Explicit }
       } else {
         return calc
@@ -197,6 +197,9 @@ export function calculatedStatToFilter (
   item: ParsedItem
 ): StatFilter {
   const { stat, sources, type } = calc
+  if (!stat?.trade) {
+    throw new Error('Stat definition is missing trade configuration')
+  }
   let filter: StatFilter
 
   if (stat.trade.option) {

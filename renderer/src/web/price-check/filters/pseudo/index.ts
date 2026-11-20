@@ -345,8 +345,11 @@ export function filterPseudo (ctx: FiltersCreationContext) {
       }
     }
 
+    const pseudoStat = pseudoStatByRef(rule.pseudo)
+    if (!pseudoStat) continue
+
     const filter = calculatedStatToFilter({
-      stat: pseudoStatByRef(rule.pseudo)!,
+      stat: pseudoStat,
       type: ModifierType.Pseudo,
       sources: sources
     }, ctx.searchInRange, ctx.item)

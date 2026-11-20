@@ -268,6 +268,9 @@ export interface PricingResult {
 }
 
 export function createTradeRequest (filters: ItemFilters, stats: FilterOrGroup[]) {
+  if (!filters?.trade) {
+    throw new Error('Trade filters are not ready')
+  }
   const body: TradeRequest = {
     query: {
       status: {

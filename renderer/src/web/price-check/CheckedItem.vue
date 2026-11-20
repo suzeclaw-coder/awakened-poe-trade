@@ -69,7 +69,7 @@ import DustValue from './expected-value/DustValue.vue'
 import FilterName from './filters/FilterName.vue'
 import { CATEGORY_TO_TRADE_ID, createTradeRequest } from './trade/pathofexile-trade'
 import { AppConfig } from '@/web/Config'
-import { FilterPreset } from './filters/interfaces'
+import { FilterPreset, ItemFilters, FilterOrGroup } from './filters/interfaces'
 import { PriceCheckWidget } from '../overlay/interfaces'
 import { useLeagues } from '@/web/background/Leagues'
 
@@ -103,8 +103,14 @@ export default defineComponent({
     const leagues = useLeagues()
 
     const presets = ref<{ active: string, presets: FilterPreset[] }>(null!)
-    const itemFilters = computed(() => presets.value.presets.find(preset => preset.id === presets.value.active)!.filters)
-    const itemStats = computed(() => presets.value.presets.find(preset => preset.id === presets.value.active)!.stats)
+    const itemFilters = computed<ItemFilters>(() => {
+      const active = presets.value?.presets.find(preset => preset.id === presets.value?.active)
+      return (active ? active.filters : presets.value?.presets[0]?.filters)!
+    })
+    const itemStats = computed<FilterOrGroup[]>(() => {
+      const active = presets.value?.presets.find(preset => preset.id === presets.value?.active)
+      return (active ? active.stats : presets.value?.presets[0]?.stats) ?? []
+    })
     const doSearch = ref(false)
     const tradeAPI = ref<'trade' | 'bulk'>('bulk')
 
@@ -114,7 +120,7 @@ export default defineComponent({
     const filtersComponent = ref<ComponentPublicInstance>(null!)
 
     watch(() => props.item, (item, prevItem) => {
-      const prevCurrency = (presets.value != null) ? itemFilters.value.trade.currency : null
+      const prevCurrency = (presets.value != null && itemFilters.value != null) ? itemFilters.value.trade.currency : null
 
       presets.value = createPresets(item, {
         league: leagues.selectedId.value!,
@@ -176,7 +182,7 @@ export default defineComponent({
       }
     }, { deep: true })
 
-    watch(() => [props.item, JSON.stringify(itemFilters.value.trade)], (curr, prev) => {
+    watch(() => [props.item, JSON.stringify(itemFilters.value?.trade)], (curr, prev) => {
       const cItem = curr[0]; const pItem = prev[0]
       const cTrade = curr[1]; const pTrade = prev[1]
 
@@ -256,6 +262,7 @@ export default defineComponent({
         presets.value.active = id
       },
       makeTradeLink () {
+        if (!itemFilters.value?.trade) return ''
         return `https://${getTradeEndpoint()}/trade/search/${itemFilters.value.trade.league}?q=${JSON.stringify(createTradeRequest(itemFilters.value, itemStats.value))}`
       },
       resetTradeResults () {

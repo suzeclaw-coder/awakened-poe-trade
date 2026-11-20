@@ -222,7 +222,7 @@ function useMarketRatioFinder () {
   function find (item: ParsedItem, filters: ItemFilters): void {
     marketRatio.value = { xchgChaos: undefined, xchgStable: undefined }
 
-    if (filters.trade.league !== defaultLeague.value?.id) return
+    if (!filters?.trade || filters.trade.league !== defaultLeague.value?.id) return
 
     const detailsId = getDetailsId(item)
     const priceEntry = detailsId && findPriceByQuery(detailsId)
@@ -314,6 +314,7 @@ export default defineComponent({
     })
 
     function makeTradeLink (_have?: string[]) {
+      if (!props.filters?.trade) return ''
       const have = _have ?? ((selectedCurr.value === 'xchgStable') ? ['divine'] : ['chaos'])
       const httpPostBody = createTradeRequest(props.filters, props.item, have)
       const httpGetQuery = { exchange: httpPostBody.query }
